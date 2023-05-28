@@ -20,41 +20,40 @@ function App() {
   const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() =>{
-      
-    const connectWallet = async() => {
-      const { ethereum } = window;
-
-          if (ethereum) {
-          const account = await ethereum.request({
-            method: "eth_requestAccounts", 
-          });
-          
-          window.ethereum.on("chainChanged", () => {
-            window.location.reload();
-          });
-
-          window.ethereum.on("accountsChanged", () => {
-            window.location.reload();
-          });
-
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        const signer = provider.getSigner();
-
-        let contractAddress = "0x15DbDa7316b66292B26D5A2253840ec9E0994c0d";
-        let contractABI = Gdrive.abi;
-        let contract = new ethers.Contract(contractAddress, contractABI, signer);
-
-        setAccount(account[0]); //signer address
-        setContract(contract); //contract address
-        setProvider(provider); //provider
-        }
-        else{
-          console.log("please install metamask");
-        }
-    };
     connectWallet();
   },[]);
 
+  const connectWallet = async() => {
+    const { ethereum } = window;
+
+        if (ethereum) {
+        const account = await ethereum.request({
+          method: "eth_requestAccounts", 
+        });
+        
+        window.ethereum.on("chainChanged", () => {
+          window.location.reload();
+        });
+
+        window.ethereum.on("accountsChanged", () => {
+          window.location.reload();
+        });
+
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+
+      let contractAddress = "0x15DbDa7316b66292B26D5A2253840ec9E0994c0d";
+      let contractABI = Gdrive.abi;
+      let contract = new ethers.Contract(contractAddress, contractABI, signer);
+
+      setAccount(account[0]); //signer account
+      setContract(contract); //contract address
+      setProvider(provider); //provider
+      }
+      else{
+        console.log("please install metamask");
+      }
+  };
 
   return (
    
@@ -71,13 +70,13 @@ function App() {
 
       <div className="App">
        
-        <h1 style={{ color: "white" }}>Gdrive 3.0</h1>
+        <h1 style={{ color: "white" }}>Decentralized Storage Drive </h1>
         <div className="bg"></div>
         <div className="bg bg2"></div>
         <div className="bg bg3"></div>
-
+        <p style={{ color: "white" }}>Store your images on the blockchain and share the access with anyone</p>
         <p style={{ color: "white" }}>
-          Account : {account ? account : "Not connected"}
+          Account : {account ? account.split() : "Not connected"}
         </p>
 
         <FileUpload

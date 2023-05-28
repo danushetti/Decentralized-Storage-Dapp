@@ -1,58 +1,74 @@
 import { useState } from "react";
-
-import axios from "axios";
+import { PINATA_KEY,PINATA_SECRET } from '../config';
+import axios from "axios";// helps us to connect to pinata server, it's a bridge between slient and server side application
 import "./FileUpload.css";
+
+//to choose the image and also upload it to IPFS network
 
 const FileUpload = ({ account, provider, contract }) => {
   const [file, setFile] = useState(null);
   const [fileName, setFileName] = useState("No image selected");
   
+  //to upload the image to pinata from the browser
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (file) {
       try {
+       console.log("started")
+        //we have created a formData object and then appended our file
+        //because we need to send our file in the form of formData to the pinata
+        //so when we make a http request we are not going to directly send the file instead we'll send this object
+
         const formData = new FormData();
-        formData.append("file", file);
-        
+        formData.append("file",file);
+        console.log("uploading to pinata", file);
         const resFile = await axios({
-          method: "post",
-          url: "https://api.pinata.cloud/pinning/pinFileToIPFS",
-          data: formData,
-          headers: {
-            pinata_api_key: 'ce8606b951b304b09993',
-            pinata_secret_api_key: `c42e7c760fdb0e01b26e384689983b40cd7b897153627bd620ec700d489eacc2`,
-            "Content-Type": "multipart/form-data",
-          },
+            method: "post",
+            url: "https://api.pinata.cloud/pinning/pinFileToIPFS",
+            data: formData,
+            headers: {
+                pinata_api_key: PINATA_KEY,
+                pinata_secret_api_key: PINATA_SECRET,
+                "Content-Type": "multipart/form-data",
+              },
         });
 
+        console.log('uploaded to ipfs')
+        //pinata provides the hash of the image we have have uploaded
+        //this hash is unique for every image
         const ImgHash = `https://gateway.pinata.cloud/ipfs/${resFile.data.IpfsHash}`;
-        console.log(ImgHash);
+        console.log(ImgHash,"this is the image url ");
          contract.add(account, ImgHash);
-         alert("Successfully Image Uploaded");
-         setFileName("no image selected");
-         setFile(ImgHash);
+         alert("Image Uploaded.... please sign the transaction");
+         setFileName("no image uploaded");
+         setFile(null);
       } catch (e) {
         alert("Unable to upload image to Pinata");
       }
     }
+    else
     alert("Successfully Image Uploaded");
     setFileName("No image selected");
     setFile(null);
   };
 
-
+  //to retrive the input input image through browser
   const retrieveFile = (event) => {
+    console.log('hi')
     const data = event.target.files[0]; //files array of files object
-    console.log(data);
-    const reader = new window.FileReader();
-    reader.readAsArrayBuffer(data);
-    reader.onloadend = () => {
-      setFile(event.target.files[0]);
-    };
+    console.log(data,"this is the file selected");
+    // const reader = new window.FileReader();
+    // reader.readAsArrayBuffer(data);
+    // reader.onloadend = () => {
+      
+    // };
+    setFile(event.target.files[0]);
     setFileName(event.target.files[0].name);
     event.preventDefault();
   };
+
+
   return (
     <div className="top">
       <form className="form" onSubmit={handleSubmit}>
